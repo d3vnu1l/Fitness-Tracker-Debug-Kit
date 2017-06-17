@@ -22,7 +22,7 @@ function varargout = layout(varargin)
 
 % Edit the above text to modify the response to help layout
 
-% Last Modified by GUIDE v2.5 03-Jun-2017 12:59:54
+% Last Modified by GUIDE v2.5 17-Jun-2017 13:44:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -200,4 +200,39 @@ function listbox2_CreateFcn(hObject, eventdata, handles)
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton5.
+function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in radiobutton1.
+function radiobutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton1
+if(get(hObject,'Value'))
+    grid on;
+else
+    grid off;
+end
+
+
+% --- Executes on button press in radiobutton2.
+function radiobutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton2
+if(get(hObject,'Value'))
+    data.visible = false
+else
+    data.visible = true
 end

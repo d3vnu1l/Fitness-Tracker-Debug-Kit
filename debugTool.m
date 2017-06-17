@@ -29,7 +29,6 @@ plotTitle = 'Serial Data Log';  % plot title
 xLabel = 'Elapsed Time (s)';    % x-axis label
 yLabel = 'Acceleration';        % y-axis label
 term = 'CR/LF';                 % line terminator
-plotGrid = 'on';                % 'off' to turn off grid
 min = -2000;                   % set y-min
 max = 2000;                    % set y-max
 scrollWidth = 18;               % display period in plot, plot entire data log if <= 0
@@ -55,7 +54,6 @@ title(plotTitle,'FontSize',25);
 xlabel(xLabel,'FontSize',15);
 ylabel(yLabel,'FontSize',15);
 axis([0 10 min max]);
-grid(plotGrid);
 
 %Open Serial COM Port
 s = serial(serialPort, 'BaudRate', 115200)
