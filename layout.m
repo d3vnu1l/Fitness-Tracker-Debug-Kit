@@ -22,7 +22,7 @@ function varargout = layout(varargin)
 
 % Edit the above text to modify the response to help layout
 
-% Last Modified by GUIDE v2.5 17-Jun-2017 13:44:36
+% Last Modified by GUIDE v2.5 02-Jul-2017 18:53:03
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -51,6 +51,40 @@ function layout_OpeningFcn(hObject, eventdata, handles, varargin)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to layout (see VARARGIN)
+%User Defined Properties
+handles.serialPort = "";            % define COM port #
+plotTitle = 'Serial Data Log';  % plot title
+xLabel = 'Elapsed Time (s)';    % x-axis label
+yLabel = 'Acceleration';        % y-axis label
+handles.term = 'CR/LF';                 % line terminator
+handles.min = -2000;                   % set y-min
+handles.max = 2000;                    % set y-max
+handles.scrollWidth = 18;               % display period in plot, plot entire data log if <= 0
+handles.delay = .01;                    % make sure sample faster than resolution
+
+
+
+%Define Function Variables
+handles.time = 0;
+handles.data = 0;
+handles.data2 = 0;
+handles.data3 = 0;
+handles.data4 = 0;
+handles.data5 = 0;
+handles.count = 0;
+handles.enable = true;
+
+%Set up Plot
+handles.plotGraph = plot(handles.time,handles.data,'-r' );
+hold on;
+handles.plotGraph2 = plot(handles.time,handles.data2,'-b');
+handles.plotGraph3 = plot(handles.time, handles.data3,'-g' );
+handles.plotGraph4 = plot(handles.time,handles.data4,'-y');
+title(plotTitle,'FontSize',25);
+xlabel(xLabel,'FontSize',15);
+ylabel(yLabel,'FontSize',15);
+axis([0 10 handles.min handles.max]);
+
 
 % Choose default command line output for layout
 handles.output = hObject;
@@ -159,7 +193,16 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 selectedItem = get(handles.listbox2, 'value');
 serinfo = instrhwinfo('serial');
-debugTool(serinfo.AvailableSerialPorts(selectedItem));
+handles.serialPort = serinfo.AvailableSerialPorts(selectedItem);
+%Set up Serial COM Port
+handles.ser = serial(handles.serialPort, 'BaudRate', 115200)
+handles.ser.Terminator = handles.term;
+fopen(handles.ser);
+guidata(hObject,handles)
+
+
+
+
 
 
 % --- Executes on button press in pushbutton3.
@@ -177,7 +220,7 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 serinfo= instrhwinfo('serial');
 set(handles.listbox2,'String',serinfo.AvailableSerialPorts) %set string
-
+guidata(hObject,handles)
 
 
 % --- Executes on selection change in listbox2.
@@ -201,7 +244,7 @@ function listbox2_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
+guidata(hObject,handles)
 
 % --- Executes on button press in pushbutton5.
 function pushbutton5_Callback(hObject, eventdata, handles)
@@ -222,7 +265,7 @@ if(get(hObject,'Value'))
 else
     grid off;
 end
-
+guidata(hObject,handles)
 
 % --- Executes on button press in radiobutton2.
 function radiobutton2_Callback(hObject, eventdata, handles)
@@ -232,7 +275,73 @@ function radiobutton2_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton2
 if(get(hObject,'Value'))
-    data.visible = false
+    handles.data.handles.visible = false
 else
-    data.visible = true
+    handles.data.handles.visible = true
+end
+guidata(hObject,handles)
+
+
+% --- Executes on button press in pushbutton6.
+function pushbutton6_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+fclose(handles.ser)
+clear handles.count handles.dat handles.delay handles.max handles.min handles.plotGraph handles.plotGraph1 handles.plotGraph2 handles.plotGrid...
+handles.plotTitle handles.s handles.scrollWidth handles.serialPort handles.xLabel handles.yLabel;
+handles.data=rot90(handles.data,3);
+handles.data2=rot90(handles.data2,3);
+handles.data3=rot90(handles.data3,3);
+handles.data4=rot90(handles.data4,3);
+dataCat = [handles.data,handles.data2,handles.data3,handles.data4];
+dlmwrite ('accelData.csv', dataCat, ',');
+type accelData.csv;
+guidata(hObject,handles)
+
+% --- Executes on button press in radiobutton3.
+function radiobutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hint: get(hObject,'Value') returns toggle state of radiobutton3
+if(get(hObject,'Value'))
+    tic
+    while (get(hObject,'Value'))       %Loop when Plot is Active
+
+        dat = fscanf(handles.ser, '%d,%f,%d,%d');
+
+        if(~isempty(dat)&&length(dat)>=3)               %Make sure Data Type is Correct
+            handles.count = handles.count + 1;
+            handles.time(handles.count) = toc;          %Extract Elapsed Time in seconds
+            handles.data(handles.count) = 5*dat(1);       %Extract 1st Data Element
+            handles.data2(handles.count) = 3*dat(2);      %Extract 2st Data Element
+            handles.data3(handles.count) = dat(3);      %Extract 3st Data Element
+            handles.data4(handles.count) = dat(4);      %Extract 2st Data Element
+
+
+            %Set Axis according to Scroll Width
+            if(handles.scrollWidth > 0)
+
+                set(handles.plotGraph,'XData',handles.time(handles.time > handles.time(handles.count)-handles.scrollWidth),'YData',handles.data(handles.time > handles.time(handles.count)-handles.scrollWidth));
+                set(handles.plotGraph2,'XData',handles.time(handles.time > handles.time(handles.count)-handles.scrollWidth),'YData',handles.data2(handles.time > handles.time(handles.count)-handles.scrollWidth));
+                set(handles.plotGraph3,'XData',handles.time(handles.time > handles.time(handles.count)-handles.scrollWidth),'YData',handles.data3(handles.time > handles.time(handles.count)-handles.scrollWidth));
+                set(handles.plotGraph4,'XData',handles.time(handles.time > handles.time(handles.count)-handles.scrollWidth),'YData',handles.data4(handles.time > handles.time(handles.count)-handles.scrollWidth));
+                axis([handles.time(handles.count)-handles.scrollWidth handles.time(handles.count) handles.min handles.max]);
+
+            else
+                set(handles.plotGraph,'XData',handles.time,'YData',handles.data);
+                set(handles.plotGraph2,'XData',handles.time,'YData',handles.data2);
+                set(handles.plotGraph3,'XData',handles.time,'YData',handles.data3);
+                set(handles.plotGraph4,'XData',handles.time,'YData',handles.data4);
+                axis([0 handles.time(handles.count) handles.min handles.max]);
+            end
+
+            %Allow MATLAB to Update Plot
+            pause(handles.delay);
+            guidata(hObject,handles)
+        end
+    end
+else
+    ;
 end
