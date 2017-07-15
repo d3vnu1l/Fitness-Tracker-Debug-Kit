@@ -22,7 +22,7 @@ function varargout = layout(varargin)
 
 % Edit the above text to modify the response to help layout
 
-% Last Modified by GUIDE v2.5 02-Jul-2017 18:53:03
+% Last Modified by GUIDE v2.5 13-Jul-2017 19:37:37
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -75,11 +75,11 @@ handles.count = 0;
 handles.enable = true;
 
 %Set up Plot
-handles.plotGraph = plot(handles.time,handles.data,'-r' );
+handles.plotGraph = plot(handles.time,handles.data,'-y' );
 hold on;
-handles.plotGraph2 = plot(handles.time,handles.data2,'-b');
+handles.plotGraph2 = plot(handles.time,handles.data2,'-r');
 handles.plotGraph3 = plot(handles.time, handles.data3,'-g' );
-handles.plotGraph4 = plot(handles.time,handles.data4,'-y');
+handles.plotGraph4 = plot(handles.time,handles.data4,'-b');
 title(plotTitle,'FontSize',25);
 xlabel(xLabel,'FontSize',15);
 ylabel(yLabel,'FontSize',15);
@@ -314,8 +314,8 @@ if(get(hObject,'Value'))
         if(~isempty(dat)&&length(dat)>=3)               %Make sure Data Type is Correct
             handles.count = handles.count + 1;
             handles.time(handles.count) = toc;          %Extract Elapsed Time in seconds
-            handles.data(handles.count) = 5*dat(1);       %Extract 1st Data Element
-            handles.data2(handles.count) = 3*dat(2);      %Extract 2st Data Element
+            handles.data(handles.count) = dat(1);       %Extract 1st Data Element
+            handles.data2(handles.count) = dat(2);      %Extract 2st Data Element
             handles.data3(handles.count) = dat(3);      %Extract 3st Data Element
             handles.data4(handles.count) = dat(4);      %Extract 2st Data Element
 
